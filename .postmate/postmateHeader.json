@@ -1,0 +1,17 @@
+[
+  {
+    "key": "content-type",
+    "value": "application/json",
+    "default": false
+  },
+  {
+    "key": "authorization",
+    "value": "Bearer {{token}}",
+    "default": false
+  },
+  {
+    "key": "accept",
+    "value": "*/*",
+    "default": true
+  }
+]

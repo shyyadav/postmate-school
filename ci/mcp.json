@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "postmate": {
+      "type": "local",
+      "command": "pmc",
+      "args": ["mcp", "--env", "QA", "--allow-mutations"],
+      "tools": ["*"]
+    }
+  }
+}

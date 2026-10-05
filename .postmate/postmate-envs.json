@@ -1,0 +1,16 @@
+{
+  "dataTables": [
+    "School-Fee"
+  ],
+  "activeEnv": "QA",
+  "QA": {
+    "schoolBaseUrl": "https://api.mithilaschool.com",
+    "username": {
+      "$secret": true
+    },
+    "__password": {
+      "$secret": true
+    },
+    "dataTableName": "School-Fee"
+  }
+}

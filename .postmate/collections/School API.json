@@ -1,0 +1,440 @@
+{
+  "id": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+  "collectionName": "School API",
+  "creatredOn": "2026-06-28T23:37:22.507Z",
+  "folders": [],
+  "requests": [
+    {
+      "url": "{{schoolBaseUrl}}/users/login",
+      "method": "POST",
+      "headers": {
+        "accept": "*/*",
+        "user-agent": "https://postmateclient.com",
+        "content-Type": "application/json"
+      },
+      "body": {
+        "json": {
+          "email": "{{username}}",
+          "password": "{{__password}}"
+        }
+      },
+      "tests": [],
+      "id": "49381275-2d9a-4bea-b91d-232006b0ea42",
+      "name": "Login",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "bodyFormat": "json",
+      "preRequests": [],
+      "testScript": "pm.setVariable('token', RESPONSE.body.accessToken);\npm.test(\"Status code is 200\", function () {\npm.expect(RESPONSE.status).to.equal(200);\n});\n",
+      "preRequestScript": "",
+      "auth": {
+        "type": "none"
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": true
+    },
+    {
+      "url": "{{schoolBaseUrl}}/client",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "content-type": "application/json",
+        "authorization": "Bearer {{token}}",
+        "user-agent": "https://postmateclient.com"
+      },
+      "body": {
+        "plainText": "",
+        "json": {}
+      },
+      "tests": [],
+      "id": "78ef1633-a126-4536-a160-c1e382a14d67",
+      "name": "Get Current User",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "bodyFormat": "json",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "testScript": "const response = RESPONSE.body;\nconst status = RESPONSE.status;\nconst headers = RESPONSE.headers;\n\npm.test(\"Returns HTTP 200\", function () {\n  pm.expect(status).to.eql(200);\n});\n\npm.test(\"Returns JSON\", function () {\n  pm.expect(headers[\"content-type\"]).to.include(\"application/json\");\n});\n\npm.schemaTest(\"Validates client response schema\", {\n  type: \"object\",\n  required: [\"fullName\", \"email\", \"userType\", \"isEmailConfirmed\", \"school\"],\n  properties: {\n    fullName: { type: \"string\" },\n    email: { type: \"string\" },\n    userType: { type: \"string\" },\n    isEmailConfirmed: { type: \"boolean\" },\n    school: {\n      type: \"object\",\n      required: [\"schoolName\", \"isAutoInvoice\", \"invoiceDate\", \"grades\"],\n      properties: {\n        schoolName: { type: \"string\" },\n        isAutoInvoice: { type: \"boolean\" },\n        invoiceDate: { type: \"number\" },\n        grades: {\n          type: \"array\",\n          items: { type: \"string\" }\n        }\n      }\n    }\n  }\n}, response);\n\npm.test(\"Validates client identity\", function () {\n  pm.expect(response.email).to.match(/^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/);\n  pm.expect(response.fullName.trim()).to.not.eql(\"\");\n});",
+      "preRequestScript": "",
+      "auth": {
+        "type": "none"
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": true,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/student",
+      "method": "GET",
+      "headers": {
+        "accept": "*/*",
+        "content-type": "application/json",
+        "user-agent": "https://postmateclient.com",
+        "authorization": "Bearer {{token}}"
+      },
+      "body": {
+        "plainText": ""
+      },
+      "tests": [
+        {
+          "testType": "In The Response Body",
+          "testTypeValue": "$.userProfile.fullName",
+          "action": "equal",
+          "expectedValue": "Shyam Narayan Yadav",
+          "testScenario": "Verify full name is correct"
+        },
+        {
+          "testType": "Set Env Variable",
+          "testTypeValue": "$.schoolInof.schoolName",
+          "action": "set to",
+          "expectedValue": "schoolName",
+          "testScenario": "Set school name in environment variable schooName"
+        },
+        {
+          "testType": "Response Code",
+          "testTypeValue": "Response Code",
+          "action": "equal",
+          "expectedValue": "200",
+          "testScenario": "Verify response code ins 200"
+        },
+        {
+          "testType": "In The Response Body",
+          "testTypeValue": "$.students.0.studentId",
+          "action": "equal",
+          "expectedValue": "4",
+          "testScenario": "Verify student id is 4"
+        },
+        {
+          "testType": "In The Response Body",
+          "testTypeValue": "$.schoolInof.schoolName",
+          "action": "contains",
+          "expectedValue": "ABC",
+          "testScenario": "Verify school name contains ABC"
+        },
+        {
+          "testType": "Response Time",
+          "testTypeValue": "Response Time",
+          "action": "<=",
+          "expectedValue": "500",
+          "testScenario": "Verify response time is less than 500"
+        },
+        {
+          "testType": "In The Response Body",
+          "testTypeValue": "$.students.0.status",
+          "action": "exist",
+          "expectedValue": "",
+          "testScenario": "Verify status field exists"
+        }
+      ],
+      "id": "a408c9d1-4773-4b1c-bcee-c29254b1c22d",
+      "name": "Get All Students",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "bodyFormat": "json",
+      "preRequests": [],
+      "testScript": "const response = RESPONSE.body;\n\npm.test(\"Status code is 200\", () => {\n  pm.expect(RESPONSE.status).to.eql(200);\n});\n\npm.test(\"Response is JSON\", () => {\n  const contentType =\n    RESPONSE.headers[\"content-type\"] || RESPONSE.headers[\"Content-Type\"];\n\n  pm.expect(contentType).to.include(\"application/json\");\n});\n\npm.schemaTest(\"Validate students response schema\", {\n  type: \"object\",\n  required: [\"userProfile\", \"schoolInof\", \"students\"],\n  properties: {\n    userProfile: {\n      type: \"object\",\n      required: [\"fullName\"],\n      properties: {\n        fullName: { type: \"string\" }\n      }\n    },\n    schoolInof: {\n      type: \"object\",\n      required: [\"schoolName\", \"isAutoInvoice\", \"invoiceDate\"],\n      properties: {\n        schoolName: { type: \"string\" },\n        isAutoInvoice: { type: \"boolean\" },\n        invoiceDate: { type: \"number\" },\n        grades: { type: [\"array\", \"null\"] }\n      }\n    },\n    students: {\n      type: \"array\",\n      items: {\n        type: \"object\",\n        required: [\n          \"studentId\",\n          \"name\",\n          \"grade\",\n          \"status\",\n          \"paymentStatus\"\n        ],\n        properties: {\n          studentId: { type: \"number\" },\n          name: { type: \"string\" },\n          grade: { type: \"string\" },\n          status: { type: \"string\" },\n          paymentStatus: { type: \"string\" },\n          school: { type: [\"object\", \"null\"] }\n        }\n      }\n    }\n  }\n}, response);\n\npm.test(\"Validate student data\", () => {\n  pm.expect(response.userProfile.fullName).to.eql(\"Shyam Narayan Yadav\");\n  pm.expect(response.schoolInof.schoolName.trim()).to.eql(\"ABC Learning Academy\");\n  pm.expect(response.students).to.be.an(\"array\");\n});",
+      "preRequestScript": "const preReslut = await pm.getRequest(\"School API.Login\").send();\r\n\r\nconsole.log(\"preReslut: \", JSON.stringify(preReslut));\r\n\r\n\r\n\r\n// console.log(\"preReslut: \", JSON.stringify(preReslut.result.body));\r\n",
+      "auth": {
+        "type": "none"
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/dashboard",
+      "method": "GET",
+      "headers": {
+        "accept": "text/plain",
+        "Authorization": "Bearer {{token}}"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "69a73bf3-3c8f-499d-81ce-f040d24345c9",
+      "name": "Get Dashboard",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {}
+      },
+      "bodyFormat": "json",
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/setting",
+      "method": "GET",
+      "headers": {
+        "accept": "text/plain",
+        "Authorization": "Bearer {{token}}"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "8d3acd0a-8c3a-49bd-80d3-e514229c341a",
+      "name": "Settings",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {}
+      },
+      "bodyFormat": "json",
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/staff",
+      "method": "POST",
+      "headers": {
+        "accept": "text/plain",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyZDhhYjhkNC00ZmJjLTQzZTAtYjQ1Ni1iNjlkNWIzODM4ZTUiLCJqdGkiOiJkNzgzZWI3My01Nzk5LTRjZjgtYmU5OC02ZGMzZGVlN2JiZjUiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjJkOGFiOGQ0LTRmYmMtNDNlMC1iNDU2LWI2OWQ1YjM4MzhlNSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6Im00QG1pdGhpbGFzY2hvb2wuY29tIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU2Nob29sT3duZXIiLCJleHAiOjE3OTAzOTUxNzksImlzcyI6Imh0dHBzOi8vYXBpLm1pdGhpbGFzY2hvb2wuY29tIiwiYXVkIjoiaHR0cHM6Ly9jbGllbnQubWl0aGlsYXNjaG9vbC5jb20vIn0.lD3PvsLet9-nytCjQe6HbWG3CjxnC0wGD7gfj8B-OQk",
+        "Content-Type": "application/json"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "b43858a1-bc0f-4947-8997-b4f512e92929",
+      "name": "Add Staff",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "bodyFormat": "json",
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {
+          "fullName": "Ravi Kumar Jha",
+          "phoneNumber": "9876543210",
+          "monthlySalary": 18000,
+          "email": "ravi.jha@example.com",
+          "address": "Ward 5, Darbhanga, Bihar",
+          "joiningDate": "2026-09-01T00:00:00Z",
+          "staffType": "Teacher"
+        }
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/setting/fee-by-grade",
+      "method": "GET",
+      "headers": {
+        "accept": "text/plain",
+        "Authorization": "Bearer {{token}}",
+        "grade": "{{grade}}"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "1f77a233-53ee-4d8a-bab2-35189cb9a70d",
+      "name": "Get Fees By Grade",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {}
+      },
+      "bodyFormat": "json",
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/setting/fees",
+      "method": "POST",
+      "headers": {
+        "accept": "*/*",
+        "Authorization": "Bearer {{token}}",
+        "Content-Type": "application/json"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "4598d00c-3830-4800-a24a-5476209f061f",
+      "name": "Add Fee",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "bodyFormat": "json",
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {
+          "feeName": "{{feeName}}",
+          "feeType": "{{feeType}}",
+          "amount": "{{amount}}",
+          "grade": [
+            "{{grade}}"
+          ]
+        }
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/setting",
+      "method": "GET",
+      "headers": {
+        "accept": "text/plain",
+        "Authorization": "Bearer {{token}}"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "2d7d5c1b-0728-408f-8635-f64e2ad870df",
+      "name": "Get All Fees",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {}
+      },
+      "bodyFormat": "json",
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    },
+    {
+      "url": "{{schoolBaseUrl}}/setting/delete-fees",
+      "method": "DELETE",
+      "headers": {
+        "accept": "*/*",
+        "Authorization": "Bearer {{token}}",
+        "Content-Type": "application/json"
+      },
+      "tests": [],
+      "preRequestScript": "",
+      "testScript": "",
+      "id": "0e5de81e-fdf0-4c12-b5ea-9d4f7977e6ae",
+      "name": "Delete Fee",
+      "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "containerId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+      "collectionName": "School API",
+      "preRequests": [
+        {
+          "collectionId": "7727c4a8-2c8e-42f1-af9f-cec1eddaec46",
+          "collectionName": "School API",
+          "requestId": "49381275-2d9a-4bea-b91d-232006b0ea42"
+        }
+      ],
+      "auth": {
+        "type": "none"
+      },
+      "updateTitle": true,
+      "bodyFormat": "json",
+      "body": {
+        "xml": "",
+        "x-www-form-urlencoded": {},
+        "plaintext": "",
+        "json": {
+          "feesName": "{{feeName}}"
+        }
+      },
+      "cookies": [],
+      "dataTags": [],
+      "runOnce": false,
+      "excludeInCollectionRun": false
+    }
+  ],
+  "isFormatted": true,
+  "displayOrder": 1001
+}

@@ -1,0 +1,4 @@
+_dtag,feeName,feeType,amount,grade,otherGrade
+fee-annual,QA Lab Fee,Annually,750,Eighth,Fifth
+fee-monthly,QA Transport Fee,Monthly,300,Ninth,Sixth
+fee-onetime,QA Admission Fee,One Time,1500,Seventh,Fourth

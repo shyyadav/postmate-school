@@ -1,0 +1,83 @@
+name: AI QA agent - fee regression
+
+# Manual only: this run creates and deletes real data and uses Copilot credits.
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'What the QA agent should do'
+        required: false
+        default: 'Run fee regression.'
+
+# Never run two regressions against the same environment at once.
+concurrency:
+  group: qa-agent-school-api
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  qa-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Postmate CLI and Copilot CLI
+        run: npm install -g @postmate/cli @github/copilot
+
+      - name: Run QA agent
+        env:
+          # Fine-grained PAT with the "Copilot Requests" permission.
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          # School API login password, read by `pmc mcp` for the {"$secret": true}
+          # variable "__password". Check utils/secretResolver.ts in postmate-cli for
+          # the exact env var name it maps "__password" to, and rename if needed.
+          POSTMATE_SECRET___PASSWORD: ${{ secrets.SCHOOL_API_PASSWORD }}
+        run: |
+          set -o pipefail
+          mkdir -p reports
+          copilot -p "${{ github.event.inputs.prompt || 'Run fee regression.' }}" \
+            --agent school-qa-agent \
+            --additional-mcp-config @ci/mcp.json \
+            --allow-all-mcp-server-instructions \
+            --disable-builtin-mcps \
+            --allow-all-tools \
+            --deny-tool shell --deny-tool write \
+            --no-ask-user \
+            --no-auto-update \
+            --share reports/qa-run.md \
+            | tee reports/qa-output.txt
+
+      - name: Add report to job summary
+        if: always()
+        run: |
+          if [ -f reports/qa-output.txt ]; then
+            echo "## QA agent report" >> "$GITHUB_STEP_SUMMARY"
+            cat reports/qa-output.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Fail the job unless every step passed
+        run: |
+          if grep -Eq "0 failed, 0 blocked" reports/qa-output.txt; then
+            echo "All steps passed."
+          else
+            echo "::error::QA agent reported failed or blocked steps (or no summary). See the report."
+            exit 1
+          fi
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qa-agent-report
+          path: reports/
+          retention-days: 14
