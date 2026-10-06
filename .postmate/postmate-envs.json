@@ -5,9 +5,7 @@
   "activeEnv": "QA",
   "QA": {
     "schoolBaseUrl": "https://api.mithilaschool.com",
-    "username": {
-      "$secret": true
-    },
+    "username": "m4@mithilaschool.com",
     "__password": {
       "$secret": true
     },

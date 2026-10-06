@@ -47,11 +47,13 @@ jobs:
           mkdir -p reports
           copilot -p "${{ github.event.inputs.prompt || 'Run fee regression.' }}" \
             --agent school-qa-agent \
+            --model gpt-6-luna \
             --additional-mcp-config @ci/mcp.json \
             --allow-all-mcp-server-instructions \
             --disable-builtin-mcps \
             --allow-all-tools \
             --deny-tool shell --deny-tool write \
+            --excluded-tools sql \
             --no-ask-user \
             --no-auto-update \
             --share reports/qa-run.md \

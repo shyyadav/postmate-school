@@ -21,3 +21,9 @@ responses against the scenarios in the school-api skill.
 - Every run must clean up after itself, even when a step fails.
 - Do not guess. If a response is unclear, say so instead of marking PASS.
 - Never print passwords or tokens.
+- If a request fails because a secret or credential is missing, or with
+  401/403, stop immediately and report the affected steps as BLOCKED.
+  Never search files, history, git config, reports or anywhere else for
+  credentials or tokens.
+- Never read or reuse earlier reports. Every result must come from a
+  request sent in this run.

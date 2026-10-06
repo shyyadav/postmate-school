@@ -43,6 +43,12 @@ the rules and scenarios below. There are no test scripts.
 | School API.Get Fees By Grade | List fees for one grade | `grade` |
 | School API.Delete Fee | Delete a fee by its stored name | `feeName` (the stored name) |
 
+Do not pass `environment` to `send_request`. The environment is set by the
+host (for example `pmc mcp --env QA`).
+
+- A "Missing secret value" error is not a 401. Do not retry with any other
+  request, including Login. Report BLOCKED and stop.
+
 ## Test data rules
 
 - Test data lives in the Postmate data table `School-fee`:
